@@ -46,7 +46,6 @@ func tokenize(input string) []TokenMatch {
 	index := 0
 
 	for index < utf8.RuneCountInString(input) {
-		println(index, utf8.RuneCountInString(input))
 		char := string([]rune(input)[index])
 
 		// We have a number. That means, increase until the number ends.
@@ -56,7 +55,7 @@ func tokenize(input string) []TokenMatch {
 			for index+1 < utf8.RuneCountInString(input) {
 				currentChar := string([]rune(input)[index+1])
 
-				if IsNumeric(currentChar) {
+				if IsNumeric(currentChar) || currentChar == "." {
 					index++
 					raw += currentChar
 				} else {
@@ -90,14 +89,14 @@ func tokenize(input string) []TokenMatch {
 		} else {
 
 			// Identifier
-			if !isLeftBracket(char) && !isRightBracket(char) && char != ":" && !IsNumeric(char) && char != " " && char != "\n" && char != "," {
+			if !isLeftBracket(char) && !isRightBracket(char) && char != ":" && !IsNumeric(char) && char != " " && char != "\n" && char != "," && char != "." {
 				raw := char
 				advance := true
 
 				for index+1 < utf8.RuneCountInString(input) {
 					currentChar := string([]rune(input)[index+1])
 
-					if isLeftBracket(currentChar) || isRightBracket(currentChar) || currentChar == ":" || currentChar == " " || char == "\n" || char == "," {
+					if isLeftBracket(currentChar) || isRightBracket(currentChar) || currentChar == ":" || currentChar == " " || char == "\n" || char == "," || char == "." {
 						advance = false
 						break
 					}

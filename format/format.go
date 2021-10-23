@@ -3,6 +3,7 @@ package format
 import (
 	"errors"
 	"fmt"
+	"go/types"
 	"os"
 	"reflect"
 	"strconv"
@@ -18,7 +19,8 @@ object: {
 // JsonEntry describes an entry in a json-object.
 type JsonEntry struct {
 	name  string
-	value reflect.Value
+	rtype types.BasicKind
+	value interface{}
 }
 
 // JsonObject describes a basic json object, with entries.
@@ -75,7 +77,7 @@ func expect(tokenType int) TokenMatch {
 }
 
 // value of an entry.
-func value() (reflect.Value, error) {
+func value() (interface{}, types.BasicKind, error) {
 	switch currentToken.tokenType {
 	case IntegerLiteral:
 		asInt, err := strconv.Atoi(currentToken.raw)
@@ -88,15 +90,17 @@ func value() (reflect.Value, error) {
 
 		expect(IntegerLiteral)
 
-		return reflect.ValueOf(asInt), nil
+		return asInt, types.Int, nil
 
 	case StringLiteral:
+		raw := currentToken.raw
+
 		expect(StringLiteral)
 
-		return reflect.ValueOf(currentToken.raw), nil
+		return raw, types.String, nil
 	}
 
-	return reflect.Value{}, errors.New("this token wasn't found")
+	return reflect.Value{}, types.Byte, errors.New("this token wasn't found")
 }
 
 // We probably have found an entry
@@ -106,18 +110,18 @@ func entry() JsonEntry {
 	expect(Identifier)
 	expect(Colon)
 
-	value, err := value()
+	value, rtype, err := value()
 
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(2)
 	}
 
-	return JsonEntry{name: entryName, value: value}
+	return JsonEntry{name: entryName, rtype: rtype, value: value}
 }
 
 // ToJsonObject Transforming a string to a JsonObject
-func ToJsonObject(input string) (JsonObject, error) {
+func ToJsonObject(input string) JsonObject {
 	var entries []JsonEntry
 	tokens = tokenize(input)
 
@@ -125,12 +129,31 @@ func ToJsonObject(input string) (JsonObject, error) {
 
 	for currentToken.tokenType != EndOfInput {
 		entries = append(entries, entry())
-		_, err := peekToken()
+		peek, err := peekToken()
 
-		if err == nil {
+		if err == nil || peek.tokenType == Comma {
 			expect(Comma)
 		}
 	}
 
-	return JsonObject{items: entries}, nil
+	return JsonObject{items: entries}
+}
+
+// FromJsonObject converts our json object to a string
+func FromJsonObject(object JsonObject) string {
+	raw := ""
+
+	for _, item := range object.items {
+		switch reflect.ValueOf(item.value).Type().Name() {
+		case "string":
+			raw += item.name + ": " + fmt.Sprint(item.value) + ", \n"
+			break
+		case "int":
+			raw += fmt.Sprintf(item.name+": %d, \n", item.value.(int))
+			break
+
+		}
+	}
+
+	return raw
 }

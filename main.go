@@ -8,7 +8,9 @@ import (
 )
 
 func main() {
-	fmt.Println(format.ToJsonObject("test: 1337, naruto: \"Super Intense Minecraft Player 😎 I'm a SIMP.\" "))
+	json := format.ToJsonObject("test: 1337, naruto: \"Super Intense Minecraft Player 😎 I'm a SIMP.\" ")
+
+	fmt.Println(format.FromJsonObject(json))
 
 	go http.Http()
 	user.User()
