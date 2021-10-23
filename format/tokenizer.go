@@ -2,6 +2,7 @@ package format
 
 import (
 	"strconv"
+	"unicode/utf8"
 )
 
 // Basically all tokens, with their identifier
@@ -14,6 +15,7 @@ const (
 	LeftBracket    = 4
 	RightBracket   = 5
 	Colon          = 6
+	Comma          = 7
 )
 
 // TokenMatch describes a matched token.
@@ -43,14 +45,15 @@ func tokenize(input string) []TokenMatch {
 	var results []TokenMatch
 	index := 0
 
-	for index < len(input) {
+	for index < utf8.RuneCountInString(input) {
+		println(index, utf8.RuneCountInString(input))
 		char := string([]rune(input)[index])
 
 		// We have a number. That means, increase until the number ends.
 		if IsNumeric(char) {
 			raw := char
 
-			for index+1 < len(input) {
+			for index+1 < utf8.RuneCountInString(input) {
 				currentChar := string([]rune(input)[index+1])
 
 				if IsNumeric(currentChar) {
@@ -68,12 +71,14 @@ func tokenize(input string) []TokenMatch {
 			results = append(results, TokenMatch{tokenType: RightBracket, raw: char})
 		} else if char == ":" {
 			results = append(results, TokenMatch{tokenType: Colon, raw: char})
+		} else if char == "," {
+			results = append(results, TokenMatch{tokenType: Comma, raw: char})
 		} else if char == "\"" {
 			raw := string([]rune(input)[index+1])
 			index++
 
 			// All char is relevant until we have another "
-			for index+1 < len(input) && string([]rune(input)[index+1]) != "\"" {
+			for index+1 < utf8.RuneCountInString(input) && string([]rune(input)[index+1]) != "\"" {
 				currentChar := string([]rune(input)[index+1])
 				raw += currentChar
 				index++
@@ -85,14 +90,14 @@ func tokenize(input string) []TokenMatch {
 		} else {
 
 			// Identifier
-			if !isLeftBracket(char) && !isRightBracket(char) && char != ":" && !IsNumeric(char) && char != " " && char != "\n" {
+			if !isLeftBracket(char) && !isRightBracket(char) && char != ":" && !IsNumeric(char) && char != " " && char != "\n" && char != "," {
 				raw := char
 				advance := true
 
-				for index+1 < len(input) {
+				for index+1 < utf8.RuneCountInString(input) {
 					currentChar := string([]rune(input)[index+1])
 
-					if isLeftBracket(currentChar) || isRightBracket(currentChar) || currentChar == ":" || currentChar == " " || char == "\n" {
+					if isLeftBracket(currentChar) || isRightBracket(currentChar) || currentChar == ":" || currentChar == " " || char == "\n" || char == "," {
 						advance = false
 						break
 					}

@@ -46,6 +46,15 @@ func nextToken() (TokenMatch, error) {
 	return tokens[currentIndex], nil
 }
 
+// peeking the next token
+func peekToken() (TokenMatch, error) {
+	if currentIndex+1 >= len(tokens) {
+		return TokenMatch{}, errors.New("the index is bigger than the length of the tokens")
+	}
+
+	return tokens[currentIndex+1], nil
+}
+
 // Expecting a certain token
 func expect(tokenType int) TokenMatch {
 	if currentToken.tokenType != tokenType {
@@ -112,12 +121,15 @@ func ToJsonObject(input string) (JsonObject, error) {
 	var entries []JsonEntry
 	tokens = tokenize(input)
 
-	fmt.Println(tokens)
-
 	currentToken, _ = nextToken()
 
 	for currentToken.tokenType != EndOfInput {
 		entries = append(entries, entry())
+		_, err := peekToken()
+
+		if err == nil {
+			expect(Comma)
+		}
 	}
 
 	return JsonObject{items: entries}, nil
