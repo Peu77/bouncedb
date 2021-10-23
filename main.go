@@ -8,6 +8,8 @@ import (
 
 func main() {
 	format.Test()
-	http.Http()
+	go http.Http()
 	user.User()
+
+	select {}
 }
