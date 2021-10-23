@@ -13,7 +13,7 @@ type Data struct {
 }
 
 func toJson(object interface{}) string {
-	jsonResponse, _ := json.Marshal(object)
+	jsonResponse, _ := json.MarshalIndent(object, "", "\t")
 	return string(jsonResponse)
 }
 
@@ -37,8 +37,8 @@ func HandleRequest(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
 	data := Data{"Peu77", 77, "heute lol"}
-	jsonResp, _ := json.Marshal(data)
-	w.Write(jsonResp)
+
+	fmt.Fprintf(w, toJson(data))
 	return
 }
 
