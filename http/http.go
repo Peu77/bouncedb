@@ -1,17 +1,20 @@
 package http
 
 import (
+	"bouncedb/http/controller"
 	"fmt"
 	"net/http"
 )
 
 func Http() {
-	http.HandleFunc("/test", func(writer http.ResponseWriter, request *http.Request) {
-		fmt.Fprintf(writer, "hello\n")
-	})
+	http.HandleFunc("/insert", controller.Insert)
+	http.HandleFunc("/update", controller.Update)
+	http.HandleFunc("/delete", controller.Delete)
+	http.HandleFunc("/get", controller.Get)
 
 	err := http.ListenAndServe(":4001", nil)
 	if err != nil {
 		return
 	}
+	fmt.Println("init http server")
 }
