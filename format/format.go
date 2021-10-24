@@ -127,6 +127,8 @@ func ToJsonObject(input string) JsonObject {
 
 	currentToken, _ = nextToken()
 
+	expect(LeftBracket)
+
 	for currentToken.tokenType != EndOfInput {
 		entries = append(entries, entry())
 		peek, err := peekToken()
@@ -136,12 +138,14 @@ func ToJsonObject(input string) JsonObject {
 		}
 	}
 
+	expect(RightBracket)
+
 	return JsonObject{items: entries}
 }
 
 // FromJsonObject converts our json object to a string
 func FromJsonObject(object JsonObject) string {
-	raw := ""
+	raw := "{\n"
 
 	for _, item := range object.items {
 		switch reflect.ValueOf(item.value).Type().Name() {
@@ -151,9 +155,27 @@ func FromJsonObject(object JsonObject) string {
 		case "int":
 			raw += fmt.Sprintf(item.name+": %d, \n", item.value.(int))
 			break
-
 		}
 	}
 
-	return raw
+	return raw + "\n}"
+}
+
+// FromStructToJson converts a struct to a string
+func FromStructToJson(s interface{}) string {
+	v := reflect.Indirect(reflect.ValueOf(s))
+	raw := "{\n"
+
+	for i := 0; i < v.NumField(); i++ {
+		fieldValue := v.Field(i)
+		ending := ",\n"
+
+		if i+1 == v.NumField() {
+			ending = ""
+		}
+
+		raw += "\t" + v.Type().Field(i).Name + ": " + fmt.Sprint(fieldValue) + ending
+	}
+
+	return raw + "\n}"
 }
