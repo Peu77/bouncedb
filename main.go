@@ -7,6 +7,8 @@ import (
 	"bouncedb/http"
 	"bouncedb/user"
 	"bouncedb/user/auth"
+	"fmt"
+	"github.com/google/uuid"
 )
 
 func main() {
@@ -18,5 +20,11 @@ func main() {
 
 	auth.CreateToken([]string{"database.conquest.*", "database.conquest.read", "database.conquest.write"})
 
+	created := database.CreateDatabase(database.NewDatabase("test"))
+
+	fmt.Println(created)
+
+	deleted := database.DeleteDatabase(uuid.MustParse("b45a5389-34f8-11ec-b274-309c23168291"))
+	fmt.Println(deleted)
 	select {}
 }

@@ -3,6 +3,6 @@ package database
 import "github.com/google/uuid"
 
 type Set struct {
-	name string
+	Name string
 	Id   uuid.UUID
 }

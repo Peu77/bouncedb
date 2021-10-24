@@ -34,17 +34,23 @@ func saveConfig() {
 	file.WriteInFile(configFile, string(marshal))
 }
 
-func CreateDatabase(database Database) {
-	Databases = append(Databases, database)
-	saveConfig()
+func CreateDatabase(database Database) bool {
+	if !existName(database.Name) {
+		Databases = append(Databases, database)
+		saveConfig()
+		return true
+	}
+	return false
 }
 
-func DeleteDatabase(id uuid.UUID) {
+func DeleteDatabase(id uuid.UUID) bool {
 	index := findElement(id)
 	if index != -1 {
 		Databases = RemoveIndex(Databases, index)
+		saveConfig()
+		return true
 	}
-	saveConfig()
+	return false
 }
 
 func RemoveIndex(s []Database, index int) []Database {
@@ -58,4 +64,13 @@ func findElement(id uuid.UUID) int {
 		}
 	}
 	return -1
+}
+
+func existName(name string) bool {
+	for _, database := range Databases {
+		if database.Name == name {
+			return true
+		}
+	}
+	return false
 }
