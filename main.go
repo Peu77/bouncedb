@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bouncedb/file"
 	"bouncedb/format"
 	"bouncedb/http"
 	"bouncedb/user"
@@ -19,6 +20,7 @@ func main() {
 
 	fmt.Println(format.FromStructToJson(v))
 
+	file.InitFiles()
 	go http.Http()
 	user.User()
 
