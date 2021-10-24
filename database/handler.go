@@ -21,15 +21,41 @@ func InitDatabases() {
 		}
 		fmt.Println(Databases)
 	} else {
-		newUUID, err := uuid.NewUUID()
-		if err != nil {
-			return
-		}
-		Databases = append(Databases, Database{"stats", newUUID, []Set{}})
-		marshal, err := json.MarshalIndent(Databases, "", "  ")
-		if err != nil {
-			return
-		}
-		file.WriteInFile(configFile, string(marshal))
+		saveConfig()
 	}
+}
+
+// overwrite the content of configFile with Databases array
+func saveConfig() {
+	marshal, err := json.MarshalIndent(Databases, "", "  ")
+	if err != nil {
+		return
+	}
+	file.WriteInFile(configFile, string(marshal))
+}
+
+func CreateDatabase(database Database) {
+	Databases = append(Databases, database)
+	saveConfig()
+}
+
+func DeleteDatabase(id uuid.UUID) {
+	index := findElement(id)
+	if index != -1 {
+		Databases = RemoveIndex(Databases, index)
+	}
+	saveConfig()
+}
+
+func RemoveIndex(s []Database, index int) []Database {
+	return append(s[:index], s[index+1:]...)
+}
+
+func findElement(id uuid.UUID) int {
+	for i, database := range Databases {
+		if database.Id == id {
+			return i
+		}
+	}
+	return -1
 }
