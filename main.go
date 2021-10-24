@@ -6,16 +6,17 @@ import (
 	"bouncedb/file"
 	"bouncedb/http"
 	"bouncedb/user"
-	"fmt"
+	"bouncedb/user/auth"
 )
 
 func main() {
 	file.InitFiles()
-	config.InitConfig()
 	database.InitDatabases()
+	config.InitConfig()
 	go http.Http()
 	user.User()
-	fmt.Println()
+
+	auth.CreateToken([]string{"database.conquest.*", "database.conquest.read", "database.conquest.write"})
 
 	select {}
 }

@@ -10,8 +10,9 @@ import (
 
 var Tokens []Token
 
-func createToken(permissions []string) {
-	var secretKey = utils.Decrypt(uuid.NewString(), config.CurrentConfig.SecretKey)
+func CreateToken(permissions []string) {
+	var secretKey = utils.Encrypt(config.Token, uuid.NewString())
 	fmt.Println("generate new token: " + secretKey)
 	Tokens = append(Tokens, Token{secretKey, time.Now().UnixMilli(), permissions})
+
 }

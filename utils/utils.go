@@ -4,58 +4,56 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"encoding/hex"
+	"encoding/base64"
 	"fmt"
 	"io"
 )
 
-func Encrypt(value string, keyString string) string {
-
-	key, _ := hex.DecodeString(keyString)
-	plaintext := []byte(value)
+func Encrypt(key []byte, text string) string {
+	// key := []byte(keyText)
+	plaintext := []byte(text)
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
 
-	aesGCM, err := cipher.NewGCM(block)
-	if err != nil {
-		panic(err.Error())
+	// The IV needs to be unique, but not secure. Therefore it's common to
+	// include it at the beginning of the ciphertext.
+	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
+	iv := ciphertext[:aes.BlockSize]
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		panic(err)
 	}
 
-	nonce := make([]byte, aesGCM.NonceSize())
-	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
-		panic(err.Error())
-	}
+	stream := cipher.NewCFBEncrypter(block, iv)
+	stream.XORKeyStream(ciphertext[aes.BlockSize:], plaintext)
 
-	ciphertext := aesGCM.Seal(nonce, nonce, plaintext, nil)
-	return fmt.Sprintf("%x", ciphertext)
+	// convert to base64
+	return base64.URLEncoding.EncodeToString(ciphertext)
 }
 
-func Decrypt(value string, keyString string) string {
-
-	key, _ := hex.DecodeString(keyString)
-	enc, _ := hex.DecodeString(value)
+// decrypt from base64 to decrypted string
+func Decrypt(key []byte, cryptoText string) string {
+	ciphertext, _ := base64.URLEncoding.DecodeString(cryptoText)
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
 
-	aesGCM, err := cipher.NewGCM(block)
-	if err != nil {
-		panic(err.Error())
+	// The IV needs to be unique, but not secure. Therefore it's common to
+	// include it at the beginning of the ciphertext.
+	if len(ciphertext) < aes.BlockSize {
+		panic("ciphertext too short")
 	}
+	iv := ciphertext[:aes.BlockSize]
+	ciphertext = ciphertext[aes.BlockSize:]
 
-	nonceSize := aesGCM.NonceSize()
+	stream := cipher.NewCFBDecrypter(block, iv)
 
-	nonce, ciphertext := enc[:nonceSize], enc[nonceSize:]
+	// XORKeyStream can work in-place if the two arguments are the same.
+	stream.XORKeyStream(ciphertext, ciphertext)
 
-	plaintext, err := aesGCM.Open(nil, nonce, ciphertext, nil)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return fmt.Sprintf("%s", plaintext)
+	return fmt.Sprintf("%s", ciphertext)
 }
