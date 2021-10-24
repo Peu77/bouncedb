@@ -77,7 +77,7 @@ func expect(tokenType int) TokenMatch {
 }
 
 // value of an entry.
-func value() (interface{}, types.BasicKind, error) {
+func value() (interface{}, error) {
 	switch currentToken.tokenType {
 	case IntegerLiteral:
 		asInt, err := strconv.Atoi(currentToken.raw)
@@ -90,17 +90,17 @@ func value() (interface{}, types.BasicKind, error) {
 
 		expect(IntegerLiteral)
 
-		return asInt, types.Int, nil
+		return asInt, nil
 
 	case StringLiteral:
 		raw := currentToken.raw
 
 		expect(StringLiteral)
 
-		return raw, types.String, nil
+		return raw, nil
 	}
 
-	return reflect.Value{}, types.Byte, errors.New("this token wasn't found")
+	return reflect.Value{}, errors.New("this token wasn't found")
 }
 
 // We probably have found an entry
@@ -110,14 +110,14 @@ func entry() JsonEntry {
 	expect(Identifier)
 	expect(Colon)
 
-	value, rtype, err := value()
+	value, err := value()
 
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(2)
 	}
 
-	return JsonEntry{name: entryName, rtype: rtype, value: value}
+	return JsonEntry{name: entryName, value: value}
 }
 
 // ToJsonObject Transforming a string to a JsonObject
