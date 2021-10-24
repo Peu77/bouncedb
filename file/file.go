@@ -2,7 +2,6 @@ package file
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 )
 
@@ -18,12 +17,6 @@ func mkdir(path string) {
 
 func InitFiles() {
 	mkdir("files/databases")
-	databasesConf := "files/databases.conf"
-	if !ExistFile(databasesConf) {
-		WriteInFile(databasesConf, "test")
-	} else {
-		fmt.Println(ReadFile(databasesConf))
-	}
 }
 
 func WriteInFile(path string, content string) {
