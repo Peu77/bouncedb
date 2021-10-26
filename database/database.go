@@ -18,3 +18,7 @@ func NewDatabase(name string) Database {
 	database.sets = []Set{}
 	return database
 }
+
+func (database Database) getPath() string {
+	return "files/databases/" + database.Name
+}

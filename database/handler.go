@@ -37,6 +37,7 @@ func saveConfig() {
 func CreateDatabase(database Database) bool {
 	if !existName(database.Name) {
 		Databases = append(Databases, database)
+		file.Mkdir(database.getPath())
 		saveConfig()
 		return true
 	}
@@ -46,6 +47,7 @@ func CreateDatabase(database Database) bool {
 func DeleteDatabase(id uuid.UUID) bool {
 	index := findElement(id)
 	if index != -1 {
+		file.RmDir(getElement(index).getPath())
 		Databases = RemoveIndex(Databases, index)
 		saveConfig()
 		return true
@@ -64,6 +66,15 @@ func findElement(id uuid.UUID) int {
 		}
 	}
 	return -1
+}
+
+func getElement(index int) Database {
+	for i, database := range Databases {
+		if i == index {
+			return database
+		}
+	}
+	return Database{}
 }
 
 func existName(name string) bool {

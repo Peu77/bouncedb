@@ -11,12 +11,16 @@ func check(e error) {
 	}
 }
 
-func mkdir(path string) {
+func Mkdir(path string) {
 	_ = os.MkdirAll(path, os.ModePerm)
 }
 
+func RmDir(path string) {
+	_ = os.RemoveAll(path)
+}
+
 func InitFiles() {
-	mkdir("files/databases")
+	Mkdir("files/databases")
 }
 
 func WriteInFile(path string, content string) {

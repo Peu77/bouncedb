@@ -24,7 +24,7 @@ func main() {
 
 	fmt.Println(created)
 
-	deleted := database.DeleteDatabase(uuid.MustParse("b45a5389-34f8-11ec-b274-309c23168291"))
+	deleted := database.DeleteDatabase(uuid.MustParse("7030e915-3684-11ec-9c08-309c23168291"))
 	fmt.Println(deleted)
 	select {}
 }
