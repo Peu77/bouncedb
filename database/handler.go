@@ -19,14 +19,13 @@ func InitDatabases() {
 			fmt.Println(err)
 			return
 		}
-		fmt.Println(Databases)
 	} else {
-		saveConfig()
+		SaveConfig()
 	}
 }
 
-// overwrite the content of configFile with Databases array
-func saveConfig() {
+// SaveConfig overwrite the content of configFile with Databases array
+func SaveConfig() {
 	marshal, err := json.MarshalIndent(Databases, "", "  ")
 	if err != nil {
 		return
@@ -37,8 +36,8 @@ func saveConfig() {
 func CreateDatabase(database Database) bool {
 	if !existName(database.Name) {
 		Databases = append(Databases, database)
-		file.Mkdir(database.getPath())
-		saveConfig()
+		file.Mkdir(database.GetPath())
+		SaveConfig()
 		return true
 	}
 	return false
@@ -47,9 +46,9 @@ func CreateDatabase(database Database) bool {
 func DeleteDatabase(id uuid.UUID) bool {
 	index := findElement(id)
 	if index != -1 {
-		file.RmDir(getElement(index).getPath())
+		file.RmDir(Databases[index].GetPath())
 		Databases = RemoveIndex(Databases, index)
-		saveConfig()
+		SaveConfig()
 		return true
 	}
 	return false
@@ -68,20 +67,16 @@ func findElement(id uuid.UUID) int {
 	return -1
 }
 
-func getElement(index int) Database {
+func GetDatabaseName(name string) (*Database, int) {
 	for i, database := range Databases {
-		if i == index {
-			return database
+		if database.Name == name {
+			return &Databases[i], 0
 		}
 	}
-	return Database{}
+	return &Database{}, 1
 }
 
 func existName(name string) bool {
-	for _, database := range Databases {
-		if database.Name == name {
-			return true
-		}
-	}
-	return false
+	_, error := GetDatabaseName(name)
+	return error == 0
 }
